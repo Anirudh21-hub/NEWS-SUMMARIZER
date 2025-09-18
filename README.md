@@ -138,9 +138,8 @@ curl -X POST "YOUR_CLOUD_FUNCTION_URL" \
      -d '{"url": "https://www.theguardian.com/world/2023/oct/26/israel-hamas-war-live-updates-gaza-latest-news"}'
 ```
 
-## Troubleshooting
+## Result Demo
 
-If you encounter a `ModuleNotFoundError` for `flask` or any other package when running the Local UI, ensure your virtual environment is activated and you have run `pip install -r requirements.txt` successfully.
+https://drive.google.com/file/d/15ZugMzvWORP3GgtDq6zpjx3-ysgei883/view?usp=sharing
 
-For Google Cloud Function deployment issues, check the Cloud Functions logs in the Google Cloud Console for detailed error messages, and ensure all required APIs are enabled and environment variables are correctly set.
 
