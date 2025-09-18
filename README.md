@@ -1,18 +1,28 @@
-# News Article Summarizer (Local UI)
+# News Article Summarizer
 
-This project provides a local web application that summarizes news articles from a given URL. It uses Flask for the web interface, `newspaper3k` for article content extraction, and NLTK for a basic extractive text summarization.
+This project demonstrates a news article summarizer that can be run either as a local web application with a UI or deployed as a Google Cloud Function.
+
+## Project Overview
+
+### Local UI Version
+
+This version provides a local web application that summarizes news articles from a given URL. It uses Flask for the web interface, `newspaper3k` for article content extraction, and NLTK for a basic extractive text summarization. It also includes in-memory caching for repeated requests.
+
+### Google Cloud Function Version
+
+This version deploys a serverless function on Google Cloud Platform that takes a news article URL as input and returns a summarized version. It leverages Google Cloud's Vertex AI for NLP summarization and can optionally use Google Cloud Memorystore for Redis for caching.
 
 ## Features
 
--   Accepts a news article URL via a web UI.
+-   Accepts a news article URL as input.
 -   Fetches the article content using `newspaper3k`.
--   Summarizes the article using a simple NLTK-based extractive summarization technique.
--   Provides an in-memory cache for repeated article fetches and summarizations to improve performance.
--   Returns a short summary in the web interface.
+-   Summarizes the article using either a local NLTK-based extractive summarizer (Local UI) or Google Cloud's Vertex AI (Cloud Function).
+-   Includes caching for repeated article fetches and summarizations (in-memory for Local UI, optional Redis for Cloud Function).
+-   Provides either a minimal web UI (Local) or responds to a POST request (Cloud Function).
 
-## Setup and Installation
+## Local UI: Setup and Installation
 
-Follow these steps to set up and run the application locally.
+Follow these steps to set up and run the local web application.
 
 1.  **Navigate to the project directory**
 
@@ -43,7 +53,7 @@ Follow these steps to set up and run the application locally.
     pip install -r requirements.txt
     ```
 
-## How to Run
+## Local UI: How to Run
 
 1.  **Ensure your virtual environment is active and dependencies are installed (as per "Setup and Installation" above).**
 
@@ -67,12 +77,70 @@ Follow these steps to set up and run the application locally.
 
     Open `http://127.0.0.1:5000/` in your preferred web browser.
 
-## Usage
+## Local UI: Usage
 
 1.  Paste the URL of a news article into the input field.
 2.  Click the "Summarize" button.
 3.  The summarized version of the article will appear below.
 
+## Google Cloud Function Deployment
+
+This section outlines the steps to deploy the summarization function as a serverless Google Cloud Function.
+
+### Prerequisites
+
+*   **Google Cloud Account:** Ensure you have an active Google Cloud Platform account.
+*   **Google Cloud SDK:** Install and initialize the Google Cloud SDK on your local machine.
+    ```bash
+    gcloud init
+    ```
+*   **Enable APIs:** Enable the Cloud Functions API, Vertex AI API, and (optionally for caching) Memorystore for Redis API for your project.
+    ```bash
+    gcloud services enable cloudfunctions.googleapis.com
+    gcloud services enable aiplatform.googleapis.com
+    gcloud services enable redis.googleapis.com
+    ```
+
+
+
+### Deploy the Google Cloud Function
+
+Navigate to the `news_summarizer` directory in your terminal (the directory containing `main.py` and `requirements.txt` for the cloud function).
+
+Use the following command to deploy your function:
+
+```bash
+gcloud functions deploy summarizeArticle \
+    --runtime python310 \
+    --trigger-http \
+    --allow-unauthenticated \
+    --entry-point summarize_article \
+    --source . \
+    --set-env-vars GCP_PROJECT_ID=[YOUR_PROJECT_ID],GCP_REGION=[YOUR_REGION],REDIS_HOST=[YOUR_REDIS_HOST],REDIS_PORT=[YOUR_REDIS_PORT] \
+    --timeout 300s \
+    --memory 256MB
+```
+
+**Replace the following placeholders:**
+
+*   `[YOUR_PROJECT_ID]`: Your Google Cloud Project ID.
+*   `[YOUR_REGION]`: The Google Cloud region where you want to deploy your function (e.g., `us-central1`). This should also be the region of your Redis instance if used.
+*   `[YOUR_REDIS_HOST]`: The host IP address of your Redis instance from Google Cloud Memorystore (only if Redis is used).
+*   `[YOUR_REDIS_PORT]`: The port of your Redis instance (default is `6379`, only if Redis is used).
+
+### Test the Google Cloud Function
+
+After deployment, Google Cloud will provide you with a trigger URL for your function. Use that URL in the following `curl` command to test your function:
+
+```bash
+curl -X POST "YOUR_CLOUD_FUNCTION_URL" \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://www.theguardian.com/world/2023/oct/26/israel-hamas-war-live-updates-gaza-latest-news"}'
+```
+
 ## Troubleshooting
 
-If you encounter a `ModuleNotFoundError` for `flask` or any other package, ensure your virtual environment is activated and you have run `pip install -r requirements.txt` successfully.
+If you encounter a `ModuleNotFoundError` for `flask` or any other package when running the Local UI, ensure your virtual environment is activated and you have run `pip install -r requirements.txt` successfully.
+
+For Google Cloud Function deployment issues, check the Cloud Functions logs in the Google Cloud Console for detailed error messages, and ensure all required APIs are enabled and environment variables are correctly set.
+
