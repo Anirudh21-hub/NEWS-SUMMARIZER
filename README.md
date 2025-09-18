@@ -143,3 +143,8 @@ curl -X POST "YOUR_CLOUD_FUNCTION_URL" \
 https://drive.google.com/file/d/15ZugMzvWORP3GgtDq6zpjx3-ysgei883/view?usp=sharing
 
 
+## Reflection
+This project provided a valuable exercise in adapting a serverless function concept to both a local environment and a cloud platform. A tricky aspect was managing NLTK's data downloads and newspaper3k's lxml dependency in the local setup, requiring specific package installations to resolve import errors.
+
+## AI Usage
+ChatGPT was instrumental in generating the initial Flask application structure, integrating newspaper3k, and setting up the NLTK-based summarizer. It also facilitated the creation of comprehensive README.md documentation, detailing both local and Google Cloud deployment steps, which was essential for covering all aspects of the user's evolving requirements.
